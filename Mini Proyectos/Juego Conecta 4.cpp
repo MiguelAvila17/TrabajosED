@@ -12,8 +12,6 @@ const string AMARILLO= "\033[33m";
 
 // Imprimir tablero con colores
 void imprimirTablero(const vector<vector<char>>& tablero) {
-    cout << string(50, '\n');  // imprime 50 saltos de línea
-
     cout << "\n====CONECTA 4====\n";
     for (int i = 0; i < FILAS; i++) {
         cout << "| ";
