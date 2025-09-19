@@ -1,6 +1,6 @@
 #include <iostream>
-#include <cstdlib>  // para rand() y srand()
-#include <ctime>    // para time()
+#include <cstdlib>
+#include <ctime>
 
 using namespace std;
 
