@@ -15,7 +15,13 @@ class Programa {
     }
 
     static void Main() {
-        int[] arr = {64, 34, 25, 12, 22, 11, 90};
+        Random rnd = new Random();
+        int[] arr = new int[10];
+        
+        for (int i = 0; i < arr.Length; i++) {
+            arr[i] = rnd.Next(1, 101); // números entre 1 y 100
+        }
+
         Console.WriteLine("Original: " + string.Join(", ", arr));
         Burbuja(arr);
         Console.WriteLine("Ordenado: " + string.Join(", ", arr));
