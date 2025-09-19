@@ -11,8 +11,9 @@ function burbuja(arr) {
     }
 }
 
-// Ejemplo
-let arr = [64, 34, 25, 12, 22, 11, 90];
+// Generar arreglo de 10 números aleatorios entre 1 y 100
+let arr = Array.from({length: 10}, () => Math.floor(Math.random() * 100) + 1);
+
 console.log("Original:", arr);
 burbuja(arr);
 console.log("Ordenado:", arr);
