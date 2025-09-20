@@ -1,0 +1,55 @@
+body {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  background: #eef6f9;
+}
+
+h1 {
+  color: #00334d;
+}
+
+.tableros {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px;
+}
+
+.tablero {
+  display: grid;
+  grid-template-columns: repeat(5, 50px);
+  grid-template-rows: repeat(5, 50px);
+  gap: 3px;
+}
+
+.celda {
+  width: 50px;
+  height: 50px;
+  background: #87cefa;
+  border: 1px solid #333;
+  cursor: pointer;
+}
+
+.celda.barco {
+  background: #2f4f4f;
+}
+
+.celda.tocado {
+  background: red;
+}
+
+.celda.agua {
+  background: white;
+}
+
+#mensaje {
+  font-size: 18px;
+  font-weight: bold;
+  margin: 15px;
+}
+
+#reiniciar {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  cursor: pointer;
+}
