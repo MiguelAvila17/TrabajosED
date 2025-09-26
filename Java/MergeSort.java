@@ -1,8 +1,6 @@
-using System;
-
-class MergeSort {
+public class MergeSort {
     // Merge dos subarrays de a[].
-    static void Merge(int[] a, int l, int m, int r) {
+    static void merge(int[] a, int l, int m, int r) {
         int a1 = m - l + 1; // Tamaño del primer subarray
         int a2 = r - m;     // Tamaño del segundo subarray
 
@@ -48,31 +46,31 @@ class MergeSort {
     }
 
     // función principal que ordena a[l..r]
-    static void MergeSort(int[] a, int l, int r) {
+    static void mergeSort(int[] a, int l, int r) {
         if (l < r) {
             // Igual que (l + r)//2, pero evita el desbordamiento
             int m = l + (r - l) / 2;
 
             // Ordenar la primera y segunda mitad
-            MergeSort(a, l, m);     // ordenar la primera mitad
-            MergeSort(a, m + 1, r); // ordenar la segunda mitad
-            Merge(a, l, m, r);      // mezclar las dos mitades
+            mergeSort(a, l, m);     // ordenar la primera mitad
+            mergeSort(a, m + 1, r); // ordenar la segunda mitad
+            merge(a, l, m, r);      // mezclar las dos mitades
         }
     }
 
     // Código para probar la implementación de MergeSort
-    static void Main() {
-        int[] a = { 39, 28, 44, 11 }; // arreglo desordenado
-        int s = a.Length; // tamaño del arreglo
+    public static void main(String[] args) {
+        int[] a = {39, 28, 44, 11}; // arreglo desordenado
+        int s = a.length; // tamaño del arreglo
 
-        Console.WriteLine("Antes de ordenar el arreglo: ");
+        System.out.println("Antes de ordenar el arreglo: ");
         for (int j = 0; j < s; j++)
-            Console.Write(a[j] + " ");
+            System.out.print(a[j] + " ");
 
-        MergeSort(a, 0, s - 1); // llama a la función mergeSort
+        mergeSort(a, 0, s - 1); // llama a la función mergeSort
 
-        Console.WriteLine("\nDespués de ordenar el arreglo: ");
+        System.out.println("\nDespués de ordenar el arreglo: ");
         for (int j = 0; j < s; j++)
-            Console.Write(a[j] + " ");
+            System.out.print(a[j] + " ");
     }
 }
