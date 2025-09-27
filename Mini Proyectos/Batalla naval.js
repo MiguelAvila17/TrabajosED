@@ -1,4 +1,7 @@
 // batalla_naval_mejorado.js
+
+//Revisado Primera Parte 26/09/2025
+
 const readline = require('readline');
 
 const FILAS = 10;
