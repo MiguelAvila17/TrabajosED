@@ -1,5 +1,8 @@
+//Promedio x Capa (3x3x3)
+
 #include <iostream>
 #include <vector>
+
 using namespace std;
 //Agregar ciclos
 
