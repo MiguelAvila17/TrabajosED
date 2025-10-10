@@ -1,5 +1,6 @@
 using System;
 using System.Drawing;
+using System.IO;
 using System.Windows.Forms;
 
 namespace TreasureHunter
@@ -20,20 +21,33 @@ namespace TreasureHunter
         int nivelActual = 1;
         int movimientosSinChoque = 0;
 
-        private Form _formInicio;
+        int tesorosRecolectados = 0;
+        int trampasEncontradas = 0;
 
+        private Form _formInicio;
+        private TextBox txtInventario;
+        string archivoGuardado = "";
+
+        // Constructor normal
         public FormJuego(Form formInicio)
         {
             InitializeComponent();
             _formInicio = formInicio;
 
-            vidas = 3;
-            energia = 4;
+            vidas = 3;      // Vidas iniciales
+            energia = 4;    // Energía inicial
 
             this.KeyPreview = true;
             this.KeyDown += FormJuego_KeyDown;
 
             CargarNivel(nivelActual);
+        }
+
+        // Constructor para cargar partida
+        public FormJuego(Form formInicio, string archivo) : this(formInicio)
+        {
+            archivoGuardado = archivo;
+            CargarPartida(archivoGuardado);
         }
 
         private void CargarNivel(int nivel)
@@ -43,29 +57,20 @@ namespace TreasureHunter
 
             switch (nivel)
             {
-                case 1:
-                    numTesoros = 25;
-                    numTrampas = 10;
-                    break;
-                case 2:
-                    numTesoros = 35;
-                    numTrampas = 15;
-                    break;
-                case 3:
-                    numTesoros = 45;
-                    numTrampas = 20;
-                    break;
+                case 1: numTesoros = 25; numTrampas = 10; break;
+                case 2: numTesoros = 35; numTrampas = 15; break;
+                case 3: numTesoros = 45; numTrampas = 20; break;
             }
 
+            // Limpiamos controles existentes y preparamos tablero
             this.Controls.Clear();
-
             grid = new Button[SIZE, SIZE];
-            this.ClientSize = new Size(SIZE * CELL + 200, SIZE * CELL);
+            this.ClientSize = new Size(SIZE * CELL + 300, SIZE * CELL);
             this.Text = $"🏴‍☠️ Treasure Hunter - Nivel {nivel}";
 
             CrearTablero(numTesoros, numTrampas);
 
-            // Posición inicial
+            // Posición inicial del jugador
             playerX = 0;
             playerY = 0;
             grid[playerX, playerY].BackColor = Color.Blue;
@@ -75,6 +80,7 @@ namespace TreasureHunter
             MostrarEstado();
         }
 
+        // Crea el tablero con tesoros, trampas y salida
         void CrearTablero(int numTesoros, int numTrampas)
         {
             for (int i = 0; i < SIZE; i++)
@@ -92,15 +98,14 @@ namespace TreasureHunter
                 }
             }
 
-            // Colocar al menos un tesoro alcanzable desde el inicio
+            // Colocamos un tesoro cerca del inicio
             grid[0, 1].Tag = TipoCelda.Tesoro;
             grid[0, 1].Text = "💰";
 
-            // Colocar el resto de tesoros y trampas
-            ColocarElementos(numTesoros - 1, TipoCelda.Tesoro, 2);
-            ColocarElementos(numTrampas, TipoCelda.Trampa, 0);
+            ColocarElementos(numTesoros - 1, TipoCelda.Tesoro, 2); // Resto de tesoros
+            ColocarElementos(numTrampas, TipoCelda.Trampa, 0);     // Trampas
 
-            // Colocar salida
+            // Colocamos la salida en posición aleatoria
             int sx, sy;
             do
             {
@@ -113,6 +118,7 @@ namespace TreasureHunter
             grid[sx, sy].BackColor = Color.Gold;
         }
 
+        // Coloca tesoros o trampas en posiciones válidas
         private void ColocarElementos(int cantidad, TipoCelda tipo, int distanciaMinima)
         {
             int colocados = 0;
@@ -129,71 +135,70 @@ namespace TreasureHunter
                     continue;
                 }
 
-                if (tipo == TipoCelda.Tesoro && x + y < distanciaMinima)
-                {
-                    intentos++;
-                    continue;
-                }
+                if (tipo == TipoCelda.Tesoro && x + y < distanciaMinima) { intentos++; continue; }
 
                 bool vecinosOcupados = false;
                 for (int dx = -1; dx <= 1; dx++)
-                {
                     for (int dy = -1; dy <= 1; dy++)
-                    {
-                        int nx = x + dx;
-                        int ny = y + dy;
-                        if (nx >= 0 && ny >= 0 && nx < SIZE && ny < SIZE)
-                        {
-                            if ((TipoCelda)grid[nx, ny].Tag != TipoCelda.Vacio)
+                        if (x + dx >= 0 && y + dy >= 0 && x + dx < SIZE && y + dy < SIZE)
+                            if ((TipoCelda)grid[x + dx, y + dy].Tag != TipoCelda.Vacio)
                                 vecinosOcupados = true;
-                        }
-                    }
-                }
 
-                if (vecinosOcupados)
-                {
-                    intentos++;
-                    continue;
-                }
+                if (vecinosOcupados) { intentos++; continue; }
 
-                // Colocar elemento
+                // Colocamos el elemento en la celda seleccionada
                 grid[x, y].Tag = tipo;
                 grid[x, y].Text = tipo == TipoCelda.Tesoro ? "💰" : "💀";
                 colocados++;
             }
         }
 
-
+        // Crear botones y panel de control
         private void CrearControlesUI()
         {
             Panel controlPanel = new Panel()
             {
-                Location = new Point(SIZE * CELL + 10, 50),
-                Size = new Size(180, 200)
+                Location = new Point(SIZE * CELL + 10, 10),
+                Size = new Size(260, SIZE * CELL)
             };
 
-            Button btnUp = new Button() { Text = "↑", Location = new Point(70, 0), Size = new Size(40, 40) };
-            Button btnDown = new Button() { Text = "↓", Location = new Point(70, 80), Size = new Size(40, 40) };
-            Button btnLeft = new Button() { Text = "←", Location = new Point(30, 40), Size = new Size(40, 40) };
-            Button btnRight = new Button() { Text = "→", Location = new Point(110, 40), Size = new Size(40, 40) };
-            Button btnSalir = new Button() { Text = "Menú", Location = new Point(50, 150), Size = new Size(80, 30) };
+            // Botones de movimiento
+            Button btnUp = new Button() { Text = "↑", Location = new Point(90, 0), Size = new Size(40, 40) };
+            Button btnDown = new Button() { Text = "↓", Location = new Point(90, 80), Size = new Size(40, 40) };
+            Button btnLeft = new Button() { Text = "←", Location = new Point(50, 40), Size = new Size(40, 40) };
+            Button btnRight = new Button() { Text = "→", Location = new Point(130, 40), Size = new Size(40, 40) };
 
+            // Botones de menú y guardar
+            Button btnSalir = new Button() { Text = "Menú", Location = new Point(60, 130), Size = new Size(80, 30) };
+            Button btnGuardar = new Button() { Text = "💾 Guardar", Location = new Point(160, 130), Size = new Size(80, 30) };
+
+            // Asociamos acciones a los botones
             btnUp.Click += (s, e) => Mover(-1, 0);
             btnDown.Click += (s, e) => Mover(1, 0);
             btnLeft.Click += (s, e) => Mover(0, -1);
             btnRight.Click += (s, e) => Mover(0, 1);
-            btnSalir.Click += (s, e) =>
-            {
-                this.Hide();
-                _formInicio.Show();
-            };
+            btnSalir.Click += (s, e) => { this.Hide(); _formInicio.Show(); };
+            btnGuardar.Click += (s, e) => GuardarPartida();
 
-            controlPanel.Controls.AddRange(new Control[] { btnUp, btnDown, btnLeft, btnRight, btnSalir });
+            // Caja de texto del inventario
+            txtInventario = new TextBox()
+            {
+                Location = new Point(10, 180),
+                Size = new Size(240, 250),
+                Multiline = true,
+                ReadOnly = true,
+                ScrollBars = ScrollBars.Vertical,
+                Font = new Font("Segoe UI", 10, FontStyle.Bold)
+            };
+            ActualizarInventario(); // Inicializamos inventario al cargar nivel
+
+            controlPanel.Controls.AddRange(new Control[] { btnUp, btnDown, btnLeft, btnRight, btnSalir, btnGuardar, txtInventario });
             this.Controls.Add(controlPanel);
         }
 
         private void FormJuego_KeyDown(object sender, KeyEventArgs e)
         {
+            // Movimientos mediante teclado
             switch (e.KeyCode)
             {
                 case Keys.W:
@@ -214,7 +219,7 @@ namespace TreasureHunter
             int nx = playerX + dx;
             int ny = playerY + dy;
 
-            // Fuera del tablero
+            // Verificamos límites del tablero
             if (nx < 0 || ny < 0 || nx >= SIZE || ny >= SIZE)
             {
                 energia--;
@@ -223,7 +228,7 @@ namespace TreasureHunter
                 return;
             }
 
-            // Limpiar celda anterior
+            // Limpiamos la celda anterior
             grid[playerX, playerY].Text = "";
             if ((TipoCelda)grid[playerX, playerY].Tag == TipoCelda.Vacio)
                 grid[playerX, playerY].BackColor = Color.LightGray;
@@ -232,6 +237,7 @@ namespace TreasureHunter
             playerY = ny;
             energia--;
 
+            // Incrementamos energía por movimiento seguro
             movimientosSinChoque++;
             if (movimientosSinChoque >= 3)
             {
@@ -239,21 +245,26 @@ namespace TreasureHunter
                 movimientosSinChoque = 0;
             }
 
+            // Lógica de la celda destino
             TipoCelda celdaDestino = (TipoCelda)(grid[playerX, playerY].Tag ?? TipoCelda.Vacio);
 
             if (celdaDestino == TipoCelda.Tesoro)
             {
+                // Recolectamos tesoro
                 puntuacion += 10 * nivelActual;
                 energia += 3;
                 grid[playerX, playerY].Tag = TipoCelda.Vacio;
+                tesorosRecolectados++;
                 MessageBox.Show("💰 ¡Tesoro Recolectado!");
             }
             else if (celdaDestino == TipoCelda.Trampa)
             {
+                // Caemos en trampa
                 vidas--;
                 energia -= 2;
                 puntuacion -= 5 * nivelActual;
                 grid[playerX, playerY].Tag = TipoCelda.Vacio;
+                trampasEncontradas++;
                 MessageBox.Show("💀 ¡Caíste en una trampa!");
                 movimientosSinChoque = 0;
             }
@@ -261,38 +272,28 @@ namespace TreasureHunter
             {
                 if (CheckFinNivel())
                 {
-                    MessageBox.Show($"🎉 ¡Saliste del laberinto! Nivel {nivelActual} completado.");
+                    MessageBox.Show($"¡Saliste del laberinto! Nivel {nivelActual} completado.");
                     puntuacion += 50;
                     nivelActual++;
-
-                    if (nivelActual > 3)
-                    {
-                        MessageBox.Show("🏆 ¡Has completado todos los niveles!");
-                        GameOver();
-                        return;
-                    }
-
+                    if (nivelActual > 3) { GameOver(); return; }
                     CargarNivel(nivelActual);
                     return;
                 }
-                else
-                {
-                    MessageBox.Show("🚫 Aún no puedes salir, faltan tesoros por recolectar.");
-                }
+                else MessageBox.Show("🚫 Aún no puedes salir, faltan tesoros por recolectar.");
             }
 
+            // Actualizamos posición del jugador
             grid[playerX, playerY].Text = "👤";
             grid[playerX, playerY].BackColor = Color.Blue;
             MostrarEstado();
+            ActualizarInventario(); // Actualizamos inventario tras cada movimiento
 
-            if (vidas <= 0 || energia <= 0)
-            {
-                GameOver();
-            }
+            if (vidas <= 0 || energia <= 0) GameOver();
         }
 
         private bool CheckFinNivel()
         {
+            // Verifica si aún quedan tesoros por recolectar
             foreach (var btn in grid)
                 if ((TipoCelda)(btn.Tag ?? TipoCelda.Vacio) == TipoCelda.Tesoro)
                     return false;
@@ -301,15 +302,95 @@ namespace TreasureHunter
 
         void MostrarEstado()
         {
+            // Actualiza título con estadísticas actuales
             this.Text = $"🏴‍☠️ Treasure Hunter | Nivel: {nivelActual} | Vidas: {Math.Max(0, vidas)} | Energía: {Math.Max(0, energia)} | Puntos: {puntuacion}";
+        }
+
+        void ActualizarInventario()
+        {
+            // Encabezado del inventario
+            txtInventario.Text = "INVENTARIO DEL JUGADOR\r\n";
+            txtInventario.Text += "=======================\r\n";
+
+            // Estadísticas generales
+            txtInventario.Text += $"Nivel: {nivelActual}\r\n";
+            txtInventario.Text += $"Vidas: {vidas}\r\n";
+            txtInventario.Text += $"Energía: {energia}\r\n";
+            txtInventario.Text += $"Puntuación: {puntuacion}\r\n";
+            txtInventario.Text += "---------------------------\r\n";
+
+            // Tesoros y trampas
+            txtInventario.Text += $"Tesoros recolectados: {tesorosRecolectados}\r\n";
+            txtInventario.Text += $"Trampas encontradas: {trampasEncontradas}\r\n";
+
+            txtInventario.Text += "=======================\r\n";
         }
 
         void GameOver()
         {
+            // Muestra mensaje de fin de juego
             MessageBox.Show($"Fin del juego 🕹️\nPuntuación final: {puntuacion}");
             this.Hide();
             _formInicio.Show();
             this.Close();
+        }
+
+        void GuardarPartida()
+        {
+            // Guardar partida en archivo
+            string path = archivoGuardado;
+            if (string.IsNullOrEmpty(path))
+            {
+                SaveFileDialog sfd = new SaveFileDialog();
+                sfd.Filter = "Archivo de partida (*.thp)|*.thp";
+                if (sfd.ShowDialog() != DialogResult.OK) return;
+                path = sfd.FileName;
+                archivoGuardado = path;
+            }
+
+            using (StreamWriter sw = new StreamWriter(path))
+            {
+                // Guardamos estadísticas y tablero
+                sw.WriteLine(nivelActual);
+                sw.WriteLine(playerX);
+                sw.WriteLine(playerY);
+                sw.WriteLine(vidas);
+                sw.WriteLine(energia);
+                sw.WriteLine(puntuacion);
+                sw.WriteLine(tesorosRecolectados);
+                sw.WriteLine(trampasEncontradas);
+
+                for (int i = 0; i < SIZE; i++)
+                    for (int j = 0; j < SIZE; j++)
+                        sw.WriteLine((int)(grid[i, j].Tag ?? TipoCelda.Vacio));
+            }
+
+            MessageBox.Show("💾 Partida guardada correctamente.");
+        }
+
+        public void CargarPartida(string archivo)
+        {
+            // Carga la partida desde archivo
+            if (!File.Exists(archivo)) return;
+
+            using (StreamReader sr = new StreamReader(archivo))
+            {
+                nivelActual = int.Parse(sr.ReadLine());
+                playerX = int.Parse(sr.ReadLine());
+                playerY = int.Parse(sr.ReadLine());
+                vidas = int.Parse(sr.ReadLine());
+                energia = int.Parse(sr.ReadLine());
+                puntuacion = int.Parse(sr.ReadLine());
+                tesorosRecolectados = int.Parse(sr.ReadLine());
+                trampasEncontradas = int.Parse(sr.ReadLine());
+
+                for (int i = 0; i < SIZE; i++)
+                    for (int j = 0; j < SIZE; j++)
+                        grid[i, j].Tag = (TipoCelda)int.Parse(sr.ReadLine());
+            }
+
+            MostrarEstado();
+            ActualizarInventario(); // Actualizamos inventario al cargar partida
         }
     }
 }

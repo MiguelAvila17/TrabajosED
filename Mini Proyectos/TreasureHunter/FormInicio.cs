@@ -22,7 +22,7 @@ namespace TreasureHunter
             lblTitulo.Text = "🏴‍☠️ TREASURE HUNTER 🪙";
             lblTitulo.Font = new Font("Arial", 16, FontStyle.Bold);
             lblTitulo.AutoSize = true;
-            lblTitulo.Location = new Point(60, 30);
+            lblTitulo.Location = new Point(60, 20);
             this.Controls.Add(lblTitulo);
 
             // --- Botón JUGAR ---
@@ -35,6 +35,30 @@ namespace TreasureHunter
             btnJugar.ForeColor = Color.White;
             btnJugar.Click += BtnJugar_Click;
             this.Controls.Add(btnJugar);
+
+            // --- Botón CARGAR PARTIDA ---
+            Button btnCargar = new Button();
+            btnCargar.Text = "📂 Cargar partida";
+            btnCargar.Font = new Font("Arial", 12);
+            btnCargar.Size = new Size(150, 50);
+            btnCargar.Location = new Point(120, 140);
+            btnCargar.BackColor = Color.Orange;
+            btnCargar.ForeColor = Color.White;
+            btnCargar.Click += (s, e) =>
+            {
+                // Abrir diálogo para seleccionar archivo guardado
+                OpenFileDialog ofd = new OpenFileDialog();
+                ofd.Filter = "Archivo de partida (*.thp)|*.thp";
+                if (ofd.ShowDialog() == DialogResult.OK)
+                {
+                    // Crear FormJuego y cargar la partida
+                    FormJuego frm = new FormJuego(this);
+                    frm.Show();
+                    frm.CargarPartida(ofd.FileName);
+                    this.Hide();
+                }
+            };
+            this.Controls.Add(btnCargar);
 
             // --- Botón INSTRUCCIONES ---
             Button btnInstrucciones = new Button();
@@ -67,7 +91,7 @@ namespace TreasureHunter
             btnSalir.Text = "❌ Salir";
             btnSalir.Font = new Font("Arial", 12);
             btnSalir.Size = new Size(120, 50);
-            btnSalir.Location = new Point(130, 190); // MÁS ARRIBA
+            btnSalir.Location = new Point(130, 190);
             btnSalir.BackColor = Color.IndianRed;
             btnSalir.ForeColor = Color.White;
             btnSalir.Click += (s, e) => Application.Exit();
