@@ -214,7 +214,7 @@ namespace TreasureHunter
 
         void Mover(int dx, int dy)
         {
-            if (vidas <= 0 || energia <= 0) return;
+            if (vidas <= 0) return;
 
             int nx = playerX + dx;
             int ny = playerY + dy;
@@ -235,33 +235,33 @@ namespace TreasureHunter
 
             playerX = nx;
             playerY = ny;
-            energia--;
 
-            // Incrementamos energía por movimiento seguro
+            puntuacion--;
+
+            // Incrementamos contador de movimientos sin chocar con pared
             movimientosSinChoque++;
+
+            // Cada 3 movimientos sin chocar con pared, se aumenta 1 punto de energía
             if (movimientosSinChoque >= 3)
             {
                 energia++;
                 movimientosSinChoque = 0;
             }
 
+
             // Lógica de la celda destino
             TipoCelda celdaDestino = (TipoCelda)(grid[playerX, playerY].Tag ?? TipoCelda.Vacio);
 
             if (celdaDestino == TipoCelda.Tesoro)
             {
-                // Recolectamos tesoro
                 puntuacion += 10 * nivelActual;
-                energia += 3;
                 grid[playerX, playerY].Tag = TipoCelda.Vacio;
                 tesorosRecolectados++;
                 MessageBox.Show("💰 ¡Tesoro Recolectado!");
             }
             else if (celdaDestino == TipoCelda.Trampa)
             {
-                // Caemos en trampa
                 vidas--;
-                energia -= 2;
                 puntuacion -= 5 * nivelActual;
                 grid[playerX, playerY].Tag = TipoCelda.Vacio;
                 trampasEncontradas++;
@@ -286,9 +286,9 @@ namespace TreasureHunter
             grid[playerX, playerY].Text = "👤";
             grid[playerX, playerY].BackColor = Color.Blue;
             MostrarEstado();
-            ActualizarInventario(); // Actualizamos inventario tras cada movimiento
+            ActualizarInventario();
 
-            if (vidas <= 0 || energia <= 0) GameOver();
+            if (vidas <= 0) GameOver();
         }
 
         private bool CheckFinNivel()
