@@ -123,7 +123,7 @@ namespace TreasureHunter
             } while ((lx == 0 && ly == 0) || (TipoCelda)grid[lx, ly].Tag != TipoCelda.Vacio);
 
             grid[lx, ly].Tag = TipoCelda.Llave;
-            grid[lx, ly].Text = "🔑"; // Oculta la llave al inicio
+            grid[lx, ly].Text = "🔑";
 
             // Colocamos la salida en posición aleatoria (oculta)
             int sx, sy;
@@ -134,7 +134,7 @@ namespace TreasureHunter
             } while ((sx == 0 && sy == 0) || (TipoCelda)grid[sx, sy].Tag != TipoCelda.Vacio || (sx + sy < SIZE / 2));
 
             grid[sx, sy].Tag = TipoCelda.Salida;
-            grid[sx, sy].Text = "🏁"; // salida también oculta al inicio
+            grid[sx, sy].Text = "🏁";
             grid[sx, sy].BackColor = Color.LightGray;
         }
 
@@ -175,11 +175,10 @@ namespace TreasureHunter
                     case TipoCelda.Tesoro:
                     case TipoCelda.Trampa:
                     case TipoCelda.Llave:
-                        grid[x, y].Text = ""; // ocultos
+                        grid[x, y].Text = ""; 
                         break;
                     case TipoCelda.Muro:
-                        grid[x, y].Text = "⬛"; // ícono visible del muro
-                        grid[x, y].BackColor = Color.DarkSlateGray;
+                        grid[x, y].Text = "";
                         break;
                 }
                 colocados++;
@@ -253,7 +252,6 @@ namespace TreasureHunter
             int nx = playerX + dx;
             int ny = playerY + dy;
 
-            // Verificamos límites del tablero
             if (nx < 0 || ny < 0 || nx >= SIZE || ny >= SIZE)
             {
                 energia--;
@@ -262,20 +260,17 @@ namespace TreasureHunter
                 return;
             }
 
-            // Si la celda destino es un muro, no se puede pasar
             if ((TipoCelda)grid[nx, ny].Tag == TipoCelda.Muro)
             {
                 MessageBox.Show("🚧 ¡No puedes pasar, hay un muro!");
-                energia--; // quita 1 energía al chocar
+                energia--;
                 movimientosSinChoque = 0;
                 MostrarEstado();
                 return;
             }
 
-            // Limpiamos la celda anterior del jugador
-            grid[playerX, playerY].Text = "";
-            if ((TipoCelda)grid[playerX, playerY].Tag == TipoCelda.Vacio)
-                grid[playerX, playerY].BackColor = Color.LightGray;
+            // Restaurar la celda anterior (solo color, el icono permanece)
+            grid[playerX, playerY].BackColor = Color.LightGray;
 
             // Actualizamos coordenadas
             playerX = nx;
@@ -284,92 +279,91 @@ namespace TreasureHunter
             puntuacion--;
             movimientosSinChoque++;
 
-            // Cada 3 movimientos sin chocar con pared, se aumenta 1 punto de energía
             if (movimientosSinChoque >= 3)
             {
                 energia++;
                 movimientosSinChoque = 0;
             }
 
-            // Lógica de la celda destino
             TipoCelda celdaDestino = (TipoCelda)(grid[playerX, playerY].Tag ?? TipoCelda.Vacio);
 
-            // Revelar el contenido de la celda al entrar
-            if (celdaDestino == TipoCelda.Tesoro) grid[playerX, playerY].Text = "💰";
-            else if (celdaDestino == TipoCelda.Trampa) grid[playerX, playerY].Text = "💀";
-            else if (celdaDestino == TipoCelda.Salida) grid[playerX, playerY].Text = "🏁";
-            else if (celdaDestino == TipoCelda.Llave) grid[playerX, playerY].Text = "🔑";
+            // Revelar permanentemente el contenido
+            switch (celdaDestino)
+            {
+                case TipoCelda.Tesoro: grid[playerX, playerY].Text = "💰"; break;
+                case TipoCelda.Trampa: grid[playerX, playerY].Text = "💀"; break;
+                case TipoCelda.Llave: grid[playerX, playerY].Text = "🔑"; break;
+                case TipoCelda.Salida: grid[playerX, playerY].Text = "🏁"; break;
+            }
 
             // Lógica de tesoro
             if (celdaDestino == TipoCelda.Tesoro)
             {
                 puntuacion += 10 * nivelActual;
-                grid[playerX, playerY].Tag = TipoCelda.Vacio;
-                grid[playerX, playerY].Text = "";
                 tesorosRecolectados++;
                 MessageBox.Show("💰 ¡Tesoro Recolectado!");
+                grid[playerX, playerY].Tag = TipoCelda.Vacio;
             }
-            // Lógica de trampa
             else if (celdaDestino == TipoCelda.Trampa)
             {
                 vidas--;
                 puntuacion -= 5 * nivelActual;
-                grid[playerX, playerY].Tag = TipoCelda.Vacio;
-                grid[playerX, playerY].Text = "";
                 trampasEncontradas++;
                 MessageBox.Show("💀 ¡Caíste en una trampa!");
                 movimientosSinChoque = 0;
+                grid[playerX, playerY].Tag = TipoCelda.Vacio;
             }
-            // Lógica de llave
             else if (celdaDestino == TipoCelda.Llave)
             {
                 tieneLlave = true;
                 puntuacion += 20 * nivelActual;
+                MessageBox.Show("🔑 ¡Has encontrado la llave!");
                 grid[playerX, playerY].Tag = TipoCelda.Vacio;
-                grid[playerX, playerY].Text = "🔑";
-                MessageBox.Show("🔑 ¡Has encontrado la llave! Ahora puedes salir del nivel.");
             }
-            // Lógica de salida
             else if (celdaDestino == TipoCelda.Salida)
             {
-                // Verificar si el jugador tiene la llave
                 if (!tieneLlave)
                 {
                     MessageBox.Show("🚫 La puerta está cerrada. Necesitas la llave 🔑 para salir.");
-                    return; // no puede salir aún
+                    return;
                 }
 
-                // Con la llave ya puede salir, sin importar los tesoros
                 MessageBox.Show($"¡Has usado la llave y escapado del laberinto! Nivel {nivelActual} completado.");
-                puntuacion += 50;  // recompensa por salir
+                puntuacion += 50;
                 nivelActual++;
-                tieneLlave = false; // reseteamos para el siguiente nivel
+                tieneLlave = false;
                 if (nivelActual > 3) { GameOver(); return; }
                 CargarNivel(nivelActual);
             }
 
-            // Actualizamos posición del jugador en pantalla
-            grid[playerX, playerY].Text = "👤";
+            // Mostrar al jugador sobre el icono sin duplicarlo
             grid[playerX, playerY].BackColor = Color.Blue;
+            // Guardamos el contenido original en Tag temporal para mostrar solo el jugador
+            grid[playerX, playerY].Text = grid[playerX, playerY].Text.Replace("👤", "") + "👤";
+
             MostrarEstado();
             ActualizarInventario();
 
             if (vidas <= 0) GameOver();
         }
 
-        // Verifica si aún quedan tesoros por recolectar
-        private bool CheckFinNivel()
-        {
-            foreach (var btn in grid)
-                if ((TipoCelda)(btn.Tag ?? TipoCelda.Vacio) == TipoCelda.Tesoro)
-                    return false;
-            return true;
-        }
-
         // Actualiza título con estadísticas actuales
         void MostrarEstado()
         {
             this.Text = $"🏴‍☠ Treasure Hunter | Nivel: {nivelActual} | Vidas: {Math.Max(0, vidas)} | Energía: {Math.Max(0, energia)} | Puntos: {puntuacion}";
+        }
+
+        // Método para calcular puntuación final considerando elementos y nivel
+        private int CalcularPuntuacionFinal()
+        {
+            int puntosTesoros = tesorosRecolectados * 10;       // Cada tesoro da 10 puntos
+            int puntosTrampas = trampasEncontradas * -5;        // Cada trampa resta 5 puntos
+            int puntosVidas = vidas * 15;                       // Cada vida restante suma 15 puntos
+            int puntosEnergia = energia * 5;                    // Cada energía restante suma 5 puntos
+
+            // Sumamos todos los puntos y multiplicamos por el nivel
+            int total = (puntosTesoros + puntosTrampas + puntosVidas + puntosEnergia) * nivelActual;
+            return total;
         }
 
         // Actualiza la información mostrada en el panel de inventario
@@ -380,7 +374,11 @@ namespace TreasureHunter
             txtInventario.Text += $"Nivel: {nivelActual}\r\n";
             txtInventario.Text += $"Vidas: {vidas}\r\n";
             txtInventario.Text += $"Energía: {energia}\r\n";
-            txtInventario.Text += $"Puntuación: {puntuacion}\r\n";
+
+            // Puntuación normal y puntuación final con multiplicador de nivel
+            txtInventario.Text += $"Puntos actuales: {puntuacion}\r\n";
+            txtInventario.Text += $"Puntos finales: {CalcularPuntuacionFinal()}\r\n";
+
             txtInventario.Text += $"Tiene llave: {(tieneLlave ? "✅ Sí" : "❌ No")}\r\n";
             txtInventario.Text += "---------------------------\r\n";
             txtInventario.Text += $"Tesoros recolectados: {tesorosRecolectados}\r\n";
@@ -388,10 +386,11 @@ namespace TreasureHunter
             txtInventario.Text += "=======================\r\n";
         }
 
-        // Muestra mensaje de fin de juego
+        // Al finalizar el juego, mostrar también la puntuación final
         void GameOver()
         {
-            MessageBox.Show($"Fin del juego 🕹\nPuntuación final: {puntuacion}");
+            int puntuacionFinal = CalcularPuntuacionFinal();
+            MessageBox.Show($"Fin del juego 🕹\nPuntuación final: {puntuacionFinal}");
             this.Hide();
             _formInicio.Show();
             this.Close();
