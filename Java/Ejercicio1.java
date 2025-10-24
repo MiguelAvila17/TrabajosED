@@ -9,7 +9,7 @@ class Persona {
         System.out.println("Nombre: " + nombre + ", Edad: " + edad);
     }
 }
-public class Main {
+public class Ejercicio1 {
     public static void main(String[] args) {
         Persona p1 = new Persona("Miguel Angel", 19);
         p1.mostrarDatos();

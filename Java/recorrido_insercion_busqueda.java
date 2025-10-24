@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class Main {
+public class recorrido_insercion_busqueda {
     public static void main(String[] args) {
         int[] arr = {10, 20, 30, 40, 50};
 

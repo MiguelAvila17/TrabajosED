@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class BucketSortExample {
+public class Bucket_Sort {
 
     static void insertionSort(List<Double> bukt) {
         for (int j = 1; j < bukt.size(); j++) {

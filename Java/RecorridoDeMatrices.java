@@ -1,4 +1,4 @@
-public class Main {
+public class RecorridoDeMatrices {
     public static void main(String[] args) {
         int[][] matriz = {
             {1,2,3},

@@ -1,6 +1,6 @@
 import java.util.Random;
 
-public class Burbuja {
+public class ordenamiento_burbuja {
     static void burbuja(int arr[]) {
         int n = arr.length;
         for (int i = 0; i < n - 1; i++) {

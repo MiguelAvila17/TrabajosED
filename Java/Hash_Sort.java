@@ -1,6 +1,6 @@
 import java.util.*;
 
-public class HashSort {
+public class Hash_Sort {
     public static void hashSort(List<Integer> arr) {
         Map<Integer, Integer> hashTable = new HashMap<>();
         int maxVal = 0;

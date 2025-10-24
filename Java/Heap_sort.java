@@ -1,4 +1,4 @@
-public class Heap_Sort {
+public class Heap_sort {
 
     // Ajustar un subárbol al heap máximo
     void heapify(int arr[], int n, int i) {
@@ -45,7 +45,7 @@ public class Heap_Sort {
         System.out.println("Antes de ordenar:");
         for (int num : arr) System.out.print(num + " ");
 
-        HeapSort ob = new HeapSort();
+        Heap_Sort ob = new Heap_Sort();
         ob.sort(arr);
 
         System.out.println("\nDespués de ordenar:");
