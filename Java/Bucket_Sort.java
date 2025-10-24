@@ -1,7 +1,9 @@
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
 
 public class Bucket_Sort {
 
+    // Método de ordenamiento por inserción para cada cubeta
     static void insertionSort(List<Double> bukt) {
         for (int j = 1; j < bukt.size(); j++) {
             double val = bukt.get(j);
@@ -14,21 +16,25 @@ public class Bucket_Sort {
         }
     }
 
+    // Método principal del algoritmo Bucket Sort
     static void bucketSort(double[] arr) {
         int s = arr.length;
         List<Double>[] buckets = new List[s];
         for (int i = 0; i < s; i++)
             buckets[i] = new ArrayList<>();
 
+        // Distribuir los elementos en cubetas
         for (double num : arr) {
             int bi = (int)(s * num);
             if (bi >= s) bi = s - 1;
             buckets[bi].add(num);
         }
 
+        // Ordenar cada cubeta
         for (List<Double> b : buckets)
             insertionSort(b);
 
+        // Combinar las cubetas
         int idx = 0;
         for (List<Double> b : buckets)
             for (double num : b)

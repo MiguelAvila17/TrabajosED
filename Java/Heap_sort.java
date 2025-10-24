@@ -45,7 +45,7 @@ public class Heap_sort {
         System.out.println("Antes de ordenar:");
         for (int num : arr) System.out.print(num + " ");
 
-        Heap_Sort ob = new Heap_Sort();
+        Heap_sort ob = new Heap_sort();
         ob.sort(arr);
 
         System.out.println("\nDespués de ordenar:");
