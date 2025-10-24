@@ -1,6 +1,7 @@
 using System;
 using System.Drawing;
 using System.IO;
+using System.Linq;
 using System.Windows.Forms;
 
 namespace TreasureHunter
@@ -389,11 +390,100 @@ namespace TreasureHunter
         // Al finalizar el juego, mostrar también la puntuación final
         void GameOver()
         {
-            int puntuacionFinal = CalcularPuntuacionFinal();
-            MessageBox.Show($"Fin del juego 🕹\nPuntuación final: {puntuacionFinal}");
+            // Calcular puntuación final total por nivel
+            int puntosNivel = (tesorosRecolectados * 10 - trampasEncontradas * 5 + vidas * 15 + energia * 5) * nivelActual;
+            puntuacion += puntosNivel;
+
+            // Pedir nombre del jugador
+            string nombreJugador = ObtenerNombreJugador("🏁 Fin del juego 🕹\nPuntuación final: " + puntuacion +
+                "\nIngresa tu nombre para el ranking:");
+
+            if (string.IsNullOrWhiteSpace(nombreJugador))
+                nombreJugador = "Jugador"; // Valor por defecto si no escribe nada
+
+            // Guardar en archivo de ranking
+            GuardarRanking(nombreJugador, puntuacion, nivelActual);
+
+            // Mostrar ranking actualizado
+            MostrarRanking();
+
+            // Volver al menú
+            MessageBox.Show($"Gracias por jugar, {nombreJugador}!\nTu puntuación total fue: {puntuacion}");
             this.Hide();
             _formInicio.Show();
             this.Close();
+        }
+
+        // Método personalizado para pedir el nombre del jugador sin usar Microsoft.VisualBasic
+        private string ObtenerNombreJugador(string mensaje)
+        {
+            Form prompt = new Form()
+            {
+                Width = 400,
+                Height = 180,
+                FormBorderStyle = FormBorderStyle.FixedDialog,
+                Text = "🏆 Fin del juego",
+                StartPosition = FormStartPosition.CenterScreen
+            };
+
+            Label lblTexto = new Label() { Left = 20, Top = 20, Text = mensaje, Width = 340, Height = 60 };
+            TextBox txtInput = new TextBox() { Left = 20, Top = 90, Width = 340 };
+            Button btnAceptar = new Button() { Text = "Aceptar", Left = 280, Width = 80, Top = 120, DialogResult = DialogResult.OK };
+
+            prompt.Controls.Add(lblTexto);
+            prompt.Controls.Add(txtInput);
+            prompt.Controls.Add(btnAceptar);
+            prompt.AcceptButton = btnAceptar;
+
+            return prompt.ShowDialog() == DialogResult.OK ? txtInput.Text : "";
+        }
+
+        // Guarda la puntuación del jugador en un archivo de ranking
+        void GuardarRanking(string nombre, int puntos, int nivel)
+        {
+            try
+            {
+                string ruta = "ranking.txt";
+                using (StreamWriter sw = new StreamWriter(ruta, true))
+                {
+                    sw.WriteLine($"{nombre};{puntos};{nivel}");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error al guardar el ranking: " + ex.Message);
+            }
+        }
+
+        // Muestra el ranking completo ordenado de mayor a menor
+        void MostrarRanking()
+        {
+            string ruta = "ranking.txt";
+            if (!File.Exists(ruta))
+            {
+                MessageBox.Show("No hay registros aún.");
+                return;
+            }
+
+            // Leer y ordenar las puntuaciones
+            var lineas = File.ReadAllLines(ruta);
+            var ranking = lineas
+                .Select(l => l.Split(';'))
+                .Select(p => new { Nombre = p[0], Puntos = int.Parse(p[1]), Nivel = int.Parse(p[2]) })
+                .OrderByDescending(x => x.Puntos)
+                .ToList();
+
+            // Formatear texto
+            string texto = "=== 🏴‍☠ RANKING TREASURE HUNTER ===\n\n";
+            int pos = 1;
+            foreach (var r in ranking)
+            {
+                texto += $"{pos}. {r.Nombre} - {r.Puntos} pts - Nivel {r.Nivel}\n";
+                pos++;
+            }
+
+            // Mostrar en un cuadro de texto
+            MessageBox.Show(texto, "🏆 Ranking");
         }
 
         // Guardar partida en archivo
