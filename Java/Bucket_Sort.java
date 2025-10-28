@@ -19,7 +19,8 @@ public class Bucket_Sort {
     // Método principal del algoritmo Bucket Sort
     static void bucketSort(double[] arr) {
         int s = arr.length;
-        List<Double>[] buckets = new List[s];
+        @SuppressWarnings("unchecked")
+        List<Double>[] buckets = (List<Double>[]) new List[s]; // CORREGIDO
         for (int i = 0; i < s; i++)
             buckets[i] = new ArrayList<>();
 
