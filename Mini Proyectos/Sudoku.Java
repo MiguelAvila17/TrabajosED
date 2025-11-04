@@ -33,7 +33,7 @@ public class Sudoku {
             }
             System.out.println("¡Nivel " + niveles[nivel] + " completado!");
         }
-        System.out.println("🎉 ¡Felicidades! Has completado los 25 tableros del Sudoku Adventure.");
+        System.out.println("¡Felicidades! Has completado los 25 tableros del Sudoku Adventure.");
     }
 
     private static void jugarTablero(int dificultad) {
@@ -116,9 +116,9 @@ public class Sudoku {
                 pw.println();
             }
 
-            System.out.println("✅ Partida guardada en " + archivo);
+            System.out.println("Partida guardada en " + archivo);
         } catch (Exception e) {
-            System.out.println("❌ Error al guardar la partida: " + e.getMessage());
+            System.out.println("Error al guardar la partida: " + e.getMessage());
         }
     }
 
@@ -144,9 +144,9 @@ public class Sudoku {
                 for (int j = 0; j < SIZE; j++)
                     isHint[i][j] = (file.nextInt() == 1);
 
-            System.out.println("✅ Partida cargada correctamente.");
+            System.out.println("Partida cargada correctamente.");
         } catch (Exception e) {
-            System.out.println("❌ Error al cargar la partida: " + e.getMessage());
+            System.out.println("Error al cargar la partida: " + e.getMessage());
         }
     }
 
