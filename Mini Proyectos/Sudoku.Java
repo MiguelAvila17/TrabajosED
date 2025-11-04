@@ -1,4 +1,5 @@
 import java.util.*;
+import java.io.*;
 
 public class Sudoku {
     private static final int SIZE = 9;
@@ -54,7 +55,7 @@ public class Sudoku {
             validarTablero();
             printBoard();
             System.out.println("Vidas restantes: " + vidas);
-            System.out.println("Opciones: 1-Insertar número  2-Pedir pista  3-Rendirse");
+            System.out.println("Opciones: 1-Insertar número  2-Pedir pista  3-Rendirse  4-Guardar partida  5-Cargar partida");
             int opcion = sc.nextInt();
             sc.nextLine();
 
@@ -67,6 +68,8 @@ public class Sudoku {
                     hintsUsed = 0;
                     vidas = 5;
                 }
+                case 4 -> guardarPartida("partida_guardada.txt");
+                case 5 -> cargarPartida("partida_guardada.txt");
                 default -> System.out.println("Opción inválida.");
             }
 
@@ -88,9 +91,69 @@ public class Sudoku {
         }
     }
 
-    // Genera un tablero de Sudoku según la dificultad
+    // === GUARDAR PARTIDA ===
+    private static void guardarPartida(String archivo) {
+        try (PrintWriter pw = new PrintWriter(new FileWriter(archivo))) {
+            pw.println(vidas + " " + hintsUsed);
+
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) pw.print(board[i][j] + " ");
+                pw.println();
+            }
+
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) pw.print(solution[i][j] + " ");
+                pw.println();
+            }
+
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) pw.print((isOriginal[i][j] ? 1 : 0) + " ");
+                pw.println();
+            }
+
+            for (int i = 0; i < SIZE; i++) {
+                for (int j = 0; j < SIZE; j++) pw.print((isHint[i][j] ? 1 : 0) + " ");
+                pw.println();
+            }
+
+            System.out.println("✅ Partida guardada en " + archivo);
+        } catch (Exception e) {
+            System.out.println("❌ Error al guardar la partida: " + e.getMessage());
+        }
+    }
+
+    // === CARGAR PARTIDA ===
+    private static void cargarPartida(String archivo) {
+        try (Scanner file = new Scanner(new File(archivo))) {
+            vidas = file.nextInt();
+            hintsUsed = file.nextInt();
+
+            for (int i = 0; i < SIZE; i++)
+                for (int j = 0; j < SIZE; j++)
+                    board[i][j] = file.nextInt();
+
+            for (int i = 0; i < SIZE; i++)
+                for (int j = 0; j < SIZE; j++)
+                    solution[i][j] = file.nextInt();
+
+            for (int i = 0; i < SIZE; i++)
+                for (int j = 0; j < SIZE; j++)
+                    isOriginal[i][j] = (file.nextInt() == 1);
+
+            for (int i = 0; i < SIZE; i++)
+                for (int j = 0; j < SIZE; j++)
+                    isHint[i][j] = (file.nextInt() == 1);
+
+            System.out.println("✅ Partida cargada correctamente.");
+        } catch (Exception e) {
+            System.out.println("❌ Error al cargar la partida: " + e.getMessage());
+        }
+    }
+
+    // === Generar Tablero ===
     private static void generarTablero(int minVisible, int maxVisible) {
         // 1. Generamos la solución completa
+        for (int i = 0; i < SIZE; i++) Arrays.fill(solution[i], 0);
         fillBoard(solution);
 
         // 2. Limpiamos el tablero
@@ -102,16 +165,12 @@ public class Sudoku {
             Arrays.fill(isOriginal[i], false);
 
         Random rand = new Random();
-
-        // 4. Calculamos cuántas casillas visibles tendrá el tablero
         int visibles = minVisible + rand.nextInt(maxVisible - minVisible + 1);
-
         int count = 0;
-        // 5. Colocamos las casillas visibles
+
         while (count < visibles) {
             int row = rand.nextInt(SIZE);
             int col = rand.nextInt(SIZE);
-
             if (!isOriginal[row][col]) {
                 board[row][col] = solution[row][col];
                 isOriginal[row][col] = true;
@@ -119,7 +178,6 @@ public class Sudoku {
             }
         }
 
-        // 6. Limpiamos pistas y errores
         for (int i = 0; i < SIZE; i++) {
             Arrays.fill(isHint[i], false);
             Arrays.fill(isError[i], false);
@@ -212,7 +270,6 @@ public class Sudoku {
         for (int i = 0; i < SIZE; i++)
             Arrays.fill(isError[i], false);
 
-        // Filas y columnas
         for (int i = 0; i < SIZE; i++) {
             Map<Integer, List<Integer>> fila = new HashMap<>();
             Map<Integer, List<Integer>> col = new HashMap<>();
@@ -224,14 +281,17 @@ public class Sudoku {
             for (List<Integer> l : col.values()) if (l.size() > 1) for (int r : l) isError[r][i] = true;
         }
 
-        // Subcuadros 3x3
         for (int boxRow = 0; boxRow < 3; boxRow++)
             for (int boxCol = 0; boxCol < 3; boxCol++) {
                 Map<Integer, List<int[]>> nums = new HashMap<>();
                 for (int i = boxRow * 3; i < boxRow * 3 + 3; i++)
                     for (int j = boxCol * 3; j < boxCol * 3 + 3; j++)
-                        if (board[i][j] != 0) nums.computeIfAbsent(board[i][j], k -> new ArrayList<>()).add(new int[]{i,j});
-                for (List<int[]> l : nums.values()) if (l.size() > 1) for (int[] pos : l) isError[pos[0]][pos[1]] = true;
+                        if (board[i][j] != 0)
+                            nums.computeIfAbsent(board[i][j], k -> new ArrayList<>()).add(new int[]{i,j});
+                for (List<int[]> l : nums.values())
+                    if (l.size() > 1)
+                        for (int[] pos : l)
+                            isError[pos[0]][pos[1]] = true;
             }
     }
 
