@@ -84,7 +84,7 @@ public class Sudoku {
                 }
             }
 
-            if (isSolved() && !hayErrores()) {
+            if (isSolved()) {
                 System.out.println(GREEN + "¡Tablero completado correctamente!" + RESET);
                 break;
             }
