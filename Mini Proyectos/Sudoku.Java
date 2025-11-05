@@ -21,9 +21,27 @@ public class Sudoku {
     private static final String RED = "\u001B[31m";
 
     private static final String[] niveles = {"Muy Fácil", "Fácil", "Medio", "Difícil", "Muy Difícil"};
+    private static final String ARCHIVO_RANKING = "ranking.txt";
+
+    // ====== Clase interna para el ranking ======
+    static class Record implements Comparable<Record> {
+        String nombre;
+        int puntaje;
+
+        Record(String nombre, int puntaje) {
+            this.nombre = nombre;
+            this.puntaje = puntaje;
+        }
+
+        @Override
+        public int compareTo(Record o) {
+            return Integer.compare(o.puntaje, this.puntaje); // Orden descendente
+        }
+    }
 
     public static void main(String[] args) {
         System.out.println("=== Bienvenido al Sudoku Adventure ===");
+        mostrarRanking(); // Mostrar ranking antes de jugar
 
         for (int nivel = 0; nivel < niveles.length; nivel++) {
             System.out.println("\nNivel: " + niveles[nivel]);
@@ -33,7 +51,7 @@ public class Sudoku {
             }
             System.out.println("¡Nivel " + niveles[nivel] + " completado!");
         }
-        System.out.println("🎉 ¡Felicidades! Has completado los 25 tableros del Sudoku Adventure.");
+        System.out.println("¡Felicidades! Has completado los 25 tableros del Sudoku Adventure.");
     }
 
     private static void jugarTablero(int dificultad) {
@@ -84,8 +102,16 @@ public class Sudoku {
                 }
             }
 
-            if (isSolved() && !hayErrores()) {
+            if (isSolved()) {
                 System.out.println(GREEN + "¡Tablero completado correctamente!" + RESET);
+                int puntaje = (vidas * 100) - (hintsUsed * 50) + (dificultad * 100);
+                if (puntaje < 0) puntaje = 0;
+
+                System.out.println("Tu puntaje: " + puntaje);
+                System.out.print("Ingresa tu nombre para el ranking: ");
+                String nombre = sc.nextLine();
+                guardarEnRanking(nombre, puntaje);
+                mostrarRanking();
                 break;
             }
         }
@@ -116,9 +142,9 @@ public class Sudoku {
                 pw.println();
             }
 
-            System.out.println("✅ Partida guardada en " + archivo);
+            System.out.println("Partida guardada en " + archivo);
         } catch (Exception e) {
-            System.out.println("❌ Error al guardar la partida: " + e.getMessage());
+            System.out.println("Error al guardar la partida: " + e.getMessage());
         }
     }
 
@@ -144,23 +170,20 @@ public class Sudoku {
                 for (int j = 0; j < SIZE; j++)
                     isHint[i][j] = (file.nextInt() == 1);
 
-            System.out.println("✅ Partida cargada correctamente.");
+            System.out.println("Partida cargada correctamente.");
         } catch (Exception e) {
-            System.out.println("❌ Error al cargar la partida: " + e.getMessage());
+            System.out.println("Error al cargar la partida: " + e.getMessage());
         }
     }
 
     // === Generar Tablero ===
     private static void generarTablero(int minVisible, int maxVisible) {
-        // 1. Generamos la solución completa
         for (int i = 0; i < SIZE; i++) Arrays.fill(solution[i], 0);
         fillBoard(solution);
 
-        // 2. Limpiamos el tablero
         for (int i = 0; i < SIZE; i++)
             Arrays.fill(board[i], 0);
 
-        // 3. Limpiamos la información de casillas originales
         for (int i = 0; i < SIZE; i++)
             Arrays.fill(isOriginal[i], false);
 
@@ -307,5 +330,53 @@ public class Sudoku {
             for (int j = 0; j < SIZE; j++)
                 if (board[i][j] != solution[i][j]) return false;
         return true;
+    }
+
+    // ===== FUNCIONES DE RANKING =====
+
+    private static void guardarEnRanking(String nombre, int puntaje) {
+        List<Record> ranking = cargarRanking();
+        ranking.add(new Record(nombre, puntaje));
+        Collections.sort(ranking);
+        if (ranking.size() > 10) ranking = ranking.subList(0, 10);
+
+        try (PrintWriter pw = new PrintWriter(new FileWriter(ARCHIVO_RANKING))) {
+            for (Record r : ranking)
+                pw.println(r.nombre + ";" + r.puntaje);
+        } catch (IOException e) {
+            System.out.println("Error al guardar el ranking: " + e.getMessage());
+        }
+    }
+
+    private static List<Record> cargarRanking() {
+        List<Record> ranking = new ArrayList<>();
+        File archivo = new File(ARCHIVO_RANKING);
+        if (!archivo.exists()) return ranking;
+
+        try (Scanner scFile = new Scanner(archivo)) {
+            while (scFile.hasNextLine()) {
+                String linea = scFile.nextLine();
+                String[] partes = linea.split(";");
+                if (partes.length == 2)
+                    ranking.add(new Record(partes[0], Integer.parseInt(partes[1])));
+            }
+        } catch (Exception e) {
+            System.out.println("Error al leer ranking: " + e.getMessage());
+        }
+        return ranking;
+    }
+
+    private static void mostrarRanking() {
+        List<Record> ranking = cargarRanking();
+        System.out.println("\n=== 🏆 RANKING DE JUGADORES 🏆 ===");
+        if (ranking.isEmpty()) {
+            System.out.println("No hay registros todavía.");
+            return;
+        }
+        int pos = 1;
+        for (Record r : ranking) {
+            System.out.printf("%2d. %-15s %5d pts\n", pos++, r.nombre, r.puntaje);
+        }
+        System.out.println("===============================\n");
     }
 }
