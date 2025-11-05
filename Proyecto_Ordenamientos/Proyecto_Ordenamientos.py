@@ -8,6 +8,8 @@ import random
 import time
 import pandas as pd
 import matplotlib.pyplot as plt
+import seaborn as sns
+import os
 
 # 1. IMPLEMENTACIÓN DE LOS MÉTODOS DE ORDENAMIENTO
 
@@ -209,13 +211,14 @@ for size in sizes:
 import seaborn as sns
 sns.set(style="whitegrid")
 
-# Asegúrate de crear el DataFrame antes de usarlo
 df = pd.DataFrame(results)
-
-# Convertimos tiempos a milisegundos
 df["Tiempo (ms)"] = df["Tiempo (s)"] * 1000
 
-# Generar una gráfica por cada tamaño
+# Carpeta de salida para guardar las gráficas
+output_dir = "graficas"
+os.makedirs(output_dir, exist_ok=True)
+
+# Generamos una gráfica por cada tamaño
 for n in [100, 1000, 10000, 100000]:
     df_n = df[df["Tamaño"] == n]
 
@@ -234,4 +237,35 @@ for n in [100, 1000, 10000, 100000]:
     plt.legend(title="Tipo de arreglo")
     plt.xticks(rotation=30)
     plt.tight_layout()
+
+    # Guardar cada gráfica como imagen
+    filename = f"grafico_{n}.png"
+    filepath = os.path.join(output_dir, filename)
+    plt.savefig(filepath)
     plt.show()
+
+print(f"\n✅ Todas las gráficas se guardaron en la carpeta: {output_dir}")
+
+# 5. TOPS DE RENDIMIENTO
+
+print("\n" + "="*60)
+print("TOPS DE ALGORITMOS POR ESCENARIO")
+print("="*60)
+
+# Top por tamaño y tipo
+for size in sizes:
+    for t in types:
+        df_subset = df[(df["Tamaño"] == size) & (df["Tipo"] == t)].sort_values(by="Tiempo (s)")
+        print(f"\nTamaño={size}, Tipo={t}")
+        print(df_subset[["Método", "Tiempo (ms)"]].to_string(index=False))
+        mejor = df_subset.iloc[0]["Método"]
+        peor = df_subset.iloc[-1]["Método"]
+        print(f"Mejor: {mejor} | Peor: {peor}")
+
+# Top global (promedio general)
+top_global = df.groupby("Método")["Tiempo (s)"].mean().sort_values()
+print("\n" + "="*60)
+print("TOP GLOBAL DE ALGORITMOS (Promedio de todos los escenarios)")
+print("="*60)
+for i, (alg, avg) in enumerate(top_global.items(), start=1):
+    print(f"{i:>2}. {alg:<15}  ->  {avg*1000:.4f} ms promedio")
