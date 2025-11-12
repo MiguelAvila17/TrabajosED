@@ -1,6 +1,6 @@
 using System;
 
-class ColaCircular {
+class Cola_Circular {
     const int MAXSIZE = 5;
     static int[] queue = new int[MAXSIZE];
     static int front = -1, rear = -1;
