@@ -1,6 +1,6 @@
 import java.util.Scanner;
 
-public class ColaCircular {
+public class Cola_Circular {
     static final int MAXSIZE = 5;
     static int[] queue = new int[MAXSIZE];
     static int front = -1, rear = -1;
