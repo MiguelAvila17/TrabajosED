@@ -1,0 +1,32 @@
+{
+  "root": {
+    "id": "R001",
+    "nombre": "/",
+    "tipo": "CARPETA",
+    "contenido": null,
+    "children": [
+      {
+        "id": "C002",
+        "nombre": "Documentos",
+        "tipo": "CARPETA",
+        "contenido": null,
+        "children": [
+          {
+            "id": "A003",
+            "nombre": "tarea.txt",
+            "tipo": "ARCHIVO",
+            "contenido": "Esto es la tarea.",
+            "children": []
+          }
+        ]
+      },
+      {
+        "id": "C004",
+        "nombre": "Musica",
+        "tipo": "CARPETA",
+        "contenido": null,
+        "children": []
+      }
+    ]
+  }
+}
