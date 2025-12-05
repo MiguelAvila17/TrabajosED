@@ -1,16 +1,16 @@
-# 🌳 Gestor de Números con Árbol Binario de Búsqueda (BST) en Consola
+# Gestor de Números con Árbol Binario de Búsqueda (BST) en Consola
 
 Este proyecto implementa un Árbol Binario de Búsqueda (BST) para gestionar números enteros, ofreciendo una interfaz de consola simple para la manipulación y visualización de la estructura de datos.
 
-## 📝 Resumen del Proyecto
+## Resumen del Proyecto
 
 La aplicación permite al usuario realizar las operaciones fundamentales de un BST: **inserción**, **búsqueda** y **eliminación**. Además, facilita la práctica de los tres tipos de **recorridos** (preorden, inorden, posorden) y proporciona métricas como la **altura** y el **tamaño** del árbol.
 
-## ⚙️ Requisitos Técnicos
+## Requisitos Técnicos
 
 * **Lenguaje de Programación:** Python 3.x
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 El código está organizado modularmente en tres archivos para mejorar la claridad y el mantenimiento:
 
@@ -20,7 +20,7 @@ El código está organizado modularmente en tres archivos para mejorar la clarid
 | `bst.py` | Clase `BST` | Implementa toda la lógica del Árbol Binario de Búsqueda (inserción, eliminación, recorridos, etc.). |
 | `main.py` | Función `main_cli` | Gestiona la Interfaz de Usuario de Consola (CLI) y la interacción con el usuario. |
 
-## 🚀 Instrucciones de Compilación y Ejecución
+## Instrucciones de Compilación y Ejecución
 
 No se requiere compilación, solo la ejecución directa del archivo principal de Python.
 
@@ -32,7 +32,7 @@ No se requiere compilación, solo la ejecución directa del archivo principal de
     python main.py
     ```
 
-## 📋 Comandos de la Interfaz de Consola
+## Comandos de la Interfaz de Consola
 
 Una vez iniciada la aplicación, se mostrará el *prompt* `BST >`. Utiliza el comando `help` para ver esta lista dentro de la aplicación.
 
@@ -50,7 +50,7 @@ Una vez iniciada la aplicación, se mostrará el *prompt* `BST >`. Utiliza el co
 | **`help`** | `help` | Muestra la lista de comandos disponibles. |
 | **`exit`** | `exit` | Cierra la aplicación (y guarda el estado del árbol si hay nodos). |
 
-## 📊 Casos de Prueba Recomendados
+## Casos de Prueba Recomendados
 
 Se recomienda ejecutar la siguiente secuencia para validar la funcionalidad completa:
 
@@ -65,7 +65,7 @@ Se recomienda ejecutar la siguiente secuencia para validar la funcionalidad comp
     * `delete 45` (Elimina un nodo con **dos hijos**).
     * Verifica el nuevo orden con `inorder`.
 
-## 📈 Comentarios sobre la Complejidad Temporal
+## Comentarios sobre la Complejidad Temporal
 
 Las operaciones fundamentales de un BST tienen una complejidad que depende de la altura ($h$) del árbol.
 
@@ -78,7 +78,7 @@ Las operaciones fundamentales de un BST tienen una complejidad que depende de la
 
 > **Nota:** El peor caso ($O(n)$) ocurre cuando el árbol está completamente desbalanceado (degenerado, como una lista enlazada).
 
-## 💾 Persistencia
+## Persistencia
 
 El programa soporta persistencia básica:
 * Al ejecutar el comando **`export`** o **`exit`**, el recorrido Inorden del árbol se guarda en el archivo **`bst_keys.txt`**.
