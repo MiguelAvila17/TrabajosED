@@ -1,0 +1,48 @@
+# depslib dependency file v1.0
+1766011563 source:c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\arbol_fs.cpp
+	"arbol_fs.h"
+	"json_io.h"
+	<fstream>
+	<algorithm>
+
+1766011551 c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\arbol_fs.h
+	<memory>
+	<string>
+	<vector>
+	<unordered_map>
+	<cstdint>
+	"nodo.h"
+	"trie.h"
+
+1766011433 c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\nodo.h
+	<string>
+	<vector>
+	<memory>
+	<cstdint>
+
+1766011433 c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\trie.h
+	<vector>
+	<string>
+	<unordered_map>
+
+1766011433 c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\json_io.h
+	<string>
+	<memory>
+	"nodo.h"
+
+1766011433 source:c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\json_io.cpp
+	"json_io.h"
+	<sstream>
+
+1766011606 source:c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\main.cpp
+	<iostream>
+	<sstream>
+	<fstream>
+	"arbol_fs.h"
+
+1766011433 source:c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\nodo.cpp
+	"nodo.h"
+
+1766011433 source:c:\users\yp318\onedrive\documentos\github\menu_consultorio\proyecto binas terminado\src\trie.cpp
+	"trie.h"
+
