@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRIMER.ASM - Estructura de un Programa en Ensamblador</title>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+background:#0f172a;
+color:white;
+overflow:hidden;
+}
+
+header{
+background:#1e293b;
+padding:15px;
+text-align:center;
+font-size:28px;
+font-weight:bold;
+box-shadow:0 0 15px black;
+}
+
+.slide{
+display:none;
+height:80vh;
+padding:40px;
+animation:fade 1s;
+overflow-y:auto;
+}
+
+.active{
+display:block;
+}
+
+@keyframes fade{
+from{
+opacity:0;
+transform:translateX(50px);
+}
+to{
+opacity:1;
+transform:translateX(0);
+}
+}
+
+h1{
+color:#38bdf8;
+margin-bottom:20px;
+}
+
+h2{
+color:#fbbf24;
+margin-bottom:15px;
+}
+
+pre{
+background:#111827;
+padding:20px;
+border-radius:10px;
+margin-top:15px;
+margin-bottom:20px;
+font-size:18px;
+overflow-x:auto;
+border-left:5px solid #38bdf8;
+}
+
+p{
+font-size:20px;
+line-height:1.8;
+}
+
+.controls{
+position:fixed;
+bottom:20px;
+width:100%;
+display:flex;
+justify-content:center;
+gap:20px;
+}
+
+button{
+padding:12px 30px;
+font-size:18px;
+border:none;
+border-radius:8px;
+cursor:pointer;
+background:#38bdf8;
+color:white;
+transition:0.3s;
+}
+
+button:hover{
+transform:scale(1.1);
+background:#0ea5e9;
+}
+
+.progress-container{
+height:10px;
+background:#334155;
+}
+
+.progress{
+height:10px;
+width:0%;
+background:#38bdf8;
+transition:0.5s;
+}
+
+.codigo{
+color:#22c55e;
+font-weight:bold;
+}
+
+.anim{
+animation:pulse 1.5s infinite;
+}
+
+@keyframes pulse{
+0%{transform:scale(1);}
+50%{transform:scale(1.05);}
+100%{transform:scale(1);}
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+PRIMER.ASM - Estructura de un Programa en Ensamblador 8086
+</header>
+
+<div class="progress-container">
+<div class="progress" id="progress"></div>
+</div>
+
+<div class="slide active">
+<h1>Portada</h1>
+<p>
+Tema 4<br>
+Tema 3: Estructura de un Programa en Ensamblador<br><br>
+
+Alumno: Miguel Angel Avila Davizon<br>
+Materia: Lenguaje Ensamblador<br><br>
+
+Esta animación explica cada línea del programa PRIMER.ASM.
+</p>
+</div>
+
+<div class="slide">
+<h1>¿Qué es PRIMER.ASM?</h1>
+<p>
+Es un programa de ejemplo que muestra la estructura básica de un programa en ensamblador para el procesador 8086 usando Turbo Assembler.
+</p>
+</div>
+
+<div class="slide">
+<h1>Comentarios</h1>
+
+<pre>
+; PRIMER.ASM
+; Este programa ilustra...
+</pre>
+
+<p>
+Todo texto que inicia con punto y coma (;) es un comentario.<br><br>
+Los comentarios sirven para documentar el programa y son ignorados por el ensamblador.
+</p>
+</div>
+
+<div class="slide">
+<h1>Código de Inicio</h1>
+
+<pre>
+ideal
+dosseg
+model small
+stack 256
+</pre>
+
+<p>
+<b>ideal</b>: Activa el modo ideal.<br>
+<b>dosseg</b>: Organiza los segmentos.<br>
+<b>model small</b>: Modelo de memoria pequeño.<br>
+<b>stack 256</b>: Reserva 256 bytes para la pila.
+</p>
+</div>
+
+<div class="slide">
+<h1>Constante Simbólica</h1>
+
+<pre>
+cte equ 10
+</pre>
+
+<p>
+La directiva EQU asigna un nombre a una constante.<br><br>
+
+<span class="codigo">
+cte = 10
+</span>
+</p>
+</div>
+
+<div class="slide">
+<h1>Segmento de Datos</h1>
+
+<pre>
+dataseg
+</pre>
+
+<p>
+Inicia la sección donde se almacenarán todas las variables del programa.
+</p>
+</div>
+
+<div class="slide">
+<h1>Variables</h1>
+
+<pre>
+codsal db 0
+dato1 db ?
+dato2 db ?
+resul db ?
+</pre>
+
+<p>
+db significa Define Byte.<br><br>
+
+codsal → código de salida.<br>
+dato1 → primer dato.<br>
+dato2 → segundo dato.<br>
+resul → resultado.<br><br>
+
+? significa sin inicializar.
+</p>
+</div>
+
+<div class="slide">
+<h1>Segmento de Código</h1>
+
+<pre>
+codeseg
+</pre>
+
+<p>
+A partir de aquí se almacenan las instrucciones ejecutables del programa.
+</p>
+</div>
+
+<div class="slide">
+<h1>Etiqueta Inicio</h1>
+
+<pre>
+inicio:
+</pre>
+
+<p>
+Es una etiqueta que marca el punto donde comenzará la ejecución del programa.
+</p>
+</div>
+
+<div class="slide">
+<h1>Inicialización de DS</h1>
+
+<pre>
+mov ax,@data
+mov ds,ax
+</pre>
+
+<p class="anim">
+@data → AX → DS
+</p>
+
+<p>
+Se carga la dirección del segmento de datos en el registro DS.
+</p>
+</div>
+
+<div class="slide">
+<h1>Carga del Primer Valor</h1>
+
+<pre>
+mov al,[dato1]
+</pre>
+
+<p>
+El contenido de dato1 se copia al registro AL.
+</p>
+</div>
+
+<div class="slide">
+<h1>Suma del Segundo Valor</h1>
+
+<pre>
+add al,[dato2]
+</pre>
+
+<p>
+AL = dato1 + dato2
+</p>
+</div>
+
+<div class="slide">
+<h1>Suma de la Constante</h1>
+
+<pre>
+add al,cte
+</pre>
+
+<p>
+AL = AL + 10
+</p>
+</div>
+
+<div class="slide">
+<h1>Guardar Resultado</h1>
+
+<pre>
+mov [resul],al
+</pre>
+
+<p>
+El valor calculado se almacena en la variable resul.
+</p>
+</div>
+
+<div class="slide">
+<h1>Finalización</h1>
+
+<pre>
+salir:
+
+mov ah,04Ch
+mov al,[codsal]
+int 21h
+
+end inicio
+</pre>
+
+<p>
+AH=4Ch indica terminar el programa.<br><br>
+
+INT 21h llama al sistema operativo DOS.<br><br>
+
+END INICIO marca el final del programa y especifica el punto de inicio.
+</p>
+</div>
+
+<div class="slide">
+<h1>Resumen General</h1>
+
+<pre>
+Comentarios
+      ↓
+Código de Inicio
+      ↓
+Constantes
+      ↓
+Variables
+      ↓
+Código Principal
+      ↓
+Salida
+      ↓
+END
+</pre>
+
+<p>
+PRIMER.ASM muestra la estructura completa de un programa ensamblador para 8086.
+</p>
+</div>
+
+<div class="controls">
+<button onclick="prevSlide()">⬅ Anterior</button>
+<button onclick="nextSlide()">Siguiente ➡</button>
+</div>
+
+<script>
+
+let slides = document.querySelectorAll(".slide");
+let current = 0;
+
+function showSlide(index){
+
+slides.forEach(slide=>{
+slide.classList.remove("active");
+});
+
+slides[index].classList.add("active");
+
+let porcentaje =
+((index+1)/slides.length)*100;
+
+document.getElementById("progress").style.width =
+porcentaje + "%";
+}
+
+function nextSlide(){
+
+if(current < slides.length-1){
+current++;
+showSlide(current);
+}
+}
+
+function prevSlide(){
+
+if(current > 0){
+current--;
+showSlide(current);
+}
+}
+
+document.addEventListener("keydown",(e)=>{
+
+if(e.key==="ArrowRight")
+nextSlide();
+
+if(e.key==="ArrowLeft")
+prevSlide();
+
+});
+
+showSlide(0);
+
+</script>
+
+</body>
+</html>
