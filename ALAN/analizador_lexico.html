@@ -1,0 +1,1319 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Analizador Léxico</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f2f4f7;
+            color: #222;
+        }
+
+        header {
+            background: #1f2937;
+            color: white;
+            text-align: center;
+            padding: 25px;
+        }
+
+        header h1 {
+            margin: 0 0 8px 0;
+        }
+
+        header p {
+            margin: 0;
+            color: #d1d5db;
+        }
+
+        .contenedor {
+            width: 90%;
+            max-width: 1100px;
+            margin: 30px auto;
+        }
+
+        .panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 3px 12px rgba(0,0,0,0.08);
+        }
+
+        .entrada {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        #entrada {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 17px;
+        }
+
+        button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        .resultado {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            display: none;
+        }
+
+        .valido {
+            background: #dcfce7;
+            border-left: 6px solid #16a34a;
+        }
+
+        .error {
+            background: #fee2e2;
+            border-left: 6px solid #dc2626;
+        }
+
+        .resultado h2 {
+            margin-top: 0;
+        }
+
+        .tipo {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th, td {
+            border: 1px solid #d1d5db;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background: #1f2937;
+            color: white;
+        }
+
+        tr:nth-child(even) {
+            background: #f9fafb;
+        }
+
+        .pruebas {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .prueba {
+            background: #e5e7eb;
+            color: #111827;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .prueba:hover {
+            background: #d1d5db;
+        }
+
+        .estado {
+            margin-top: 15px;
+            padding: 12px;
+            background: #f3f4f6;
+            border-radius: 8px;
+            font-family: monospace;
+        }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #6b7280;
+        }
+
+        @media (max-width: 700px) {
+
+            .entrada {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<header>
+    <h1>Analizador Léxico</h1>
+    <p>Implementación mediante matriz de transición</p>
+</header>
+
+<div class="contenedor">
+
+    <!-- =====================================================
+         PANEL PRINCIPAL
+    ====================================================== -->
+
+    <div class="panel">
+
+        <h2>Analizar una entrada</h2>
+
+        <p>
+            Introduce una palabra o símbolo y presiona
+            <strong>Analizar</strong>.
+        </p>
+
+        <div class="entrada">
+
+            <input
+                type="text"
+                id="entrada"
+                placeholder="Ejemplo: abc123"
+                autocomplete="off"
+            >
+
+            <button onclick="analizarEntrada()">
+                Analizar
+            </button>
+
+        </div>
+
+        <div id="resultado" class="resultado">
+
+            <h2 id="estadoResultado"></h2>
+
+            <p>
+                <strong>Entrada:</strong>
+                <span id="textoEntrada"></span>
+            </p>
+
+            <p>
+                <strong>Tipo:</strong>
+                <span id="tipoResultado" class="tipo"></span>
+            </p>
+
+            <p>
+                <strong>Mensaje:</strong>
+                <span id="mensajeResultado"></span>
+            </p>
+
+        </div>
+
+        <div id="recorrido" class="estado" style="display:none;"></div>
+
+    </div>
+
+
+    <!-- =====================================================
+         PRUEBAS RAPIDAS
+    ====================================================== -->
+
+    <div class="panel">
+
+        <h2>Pruebas rápidas</h2>
+
+        <div class="pruebas">
+
+            <span class="prueba" onclick="probar('abc')">
+                abc
+            </span>
+
+            <span class="prueba" onclick="probar('abc123')">
+                abc123
+            </span>
+
+            <span class="prueba" onclick="probar('abc123x')">
+                abc123x
+            </span>
+
+            <span class="prueba" onclick="probar('12345')">
+                12345
+            </span>
+
+            <span class="prueba" onclick="probar('25.50')">
+                25.50
+            </span>
+
+            <span class="prueba" onclick="probar('6.02E23')">
+                6.02E23
+            </span>
+
+            <span class="prueba" onclick="probar('while')">
+                while
+            </span>
+
+            <span class="prueba" onclick="probar('==')">
+                ==
+            </span>
+
+            <span class="prueba" onclick="probar('+')">
+                +
+            </span>
+
+            <span class="prueba" onclick='probar("\"Hola mundo\"")'>
+                "Hola mundo"
+            </span>
+
+            <span class="prueba" onclick="probar('12.5.6')">
+                12.5.6
+            </span>
+
+            <span class="prueba" onclick="probar('3E')">
+                3E
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- =====================================================
+         MATRIZ DE TRANSICION
+    ====================================================== -->
+
+    <div class="panel">
+
+        <h2>Matriz de transición</h2>
+
+        <p>
+            La siguiente matriz representa los estados utilizados
+            por el analizador léxico.
+        </p>
+
+        <table>
+
+            <tr>
+                <th>Estado</th>
+                <th>Letra</th>
+                <th>Dígito</th>
+                <th>.</th>
+                <th>E/e</th>
+                <th>+/-</th>
+                <th>Otro</th>
+            </tr>
+
+            <tr>
+                <td>q0</td>
+                <td>q1</td>
+                <td>q3</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q1</td>
+                <td>q1</td>
+                <td>q2</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q2</td>
+                <td>Error</td>
+                <td>q2</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q3</td>
+                <td>Error</td>
+                <td>q3</td>
+                <td>q4</td>
+                <td>q6</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q4</td>
+                <td>Error</td>
+                <td>q5</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q5</td>
+                <td>Error</td>
+                <td>q5</td>
+                <td>Error</td>
+                <td>q6</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q6</td>
+                <td>Error</td>
+                <td>q8</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>q7</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q7</td>
+                <td>Error</td>
+                <td>q8</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+            <tr>
+                <td>q8</td>
+                <td>Error</td>
+                <td>q8</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+                <td>Error</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+
+    <!-- =====================================================
+         ESTADOS
+    ====================================================== -->
+
+    <div class="panel">
+
+        <h2>Estados finales</h2>
+
+        <table>
+
+            <tr>
+                <th>Estado</th>
+                <th>Tipo reconocido</th>
+            </tr>
+
+            <tr>
+                <td>q1</td>
+                <td>Variable</td>
+            </tr>
+
+            <tr>
+                <td>q2</td>
+                <td>Variable con números</td>
+            </tr>
+
+            <tr>
+                <td>q3</td>
+                <td>Número entero</td>
+            </tr>
+
+            <tr>
+                <td>q5</td>
+                <td>Número real</td>
+            </tr>
+
+            <tr>
+                <td>q8</td>
+                <td>Número científico</td>
+            </tr>
+
+        </table>
+
+    </div>
+
+</div>
+
+
+<footer>
+    Analizador Léxico | Teoría de la Computación
+</footer>
+
+
+<script>
+
+    // ==========================================================
+    // MATRIZ DE TRANSICIÓN
+    // ==========================================================
+
+    /*
+       0 = LETRA
+       1 = DIGITO
+       2 = PUNTO
+       3 = E/e
+       4 = SIGNO
+       5 = OTRO
+
+       Estados:
+
+       0 = q0
+       1 = q1
+       2 = q2
+       3 = q3
+       4 = q4
+       5 = q5
+       6 = q6
+       7 = q7
+       8 = q8
+       9 = ERROR
+    */
+
+    const matriz = [
+
+        [1, 3, 9, 9, 9, 9],  // q0
+        [1, 2, 9, 9, 9, 9],  // q1
+        [9, 2, 9, 9, 9, 9],  // q2
+        [9, 3, 4, 6, 9, 9],  // q3
+        [9, 5, 9, 9, 9, 9],  // q4
+        [9, 5, 9, 6, 9, 9],  // q5
+        [9, 8, 9, 9, 7, 9],  // q6
+        [9, 8, 9, 9, 9, 9],  // q7
+        [9, 8, 9, 9, 9, 9],  // q8
+        [9, 9, 9, 9, 9, 9]   // q9
+    ];
+
+
+    // ==========================================================
+    // PALABRAS RESERVADAS
+    // ==========================================================
+
+    const palabrasReservadas = [
+
+        "if",
+        "else",
+        "while",
+        "for",
+        "do",
+        "switch",
+        "case",
+        "break",
+        "continue",
+        "int",
+        "float",
+        "double",
+        "char",
+        "string",
+        "boolean",
+        "return",
+        "void",
+        "public",
+        "private",
+        "protected",
+        "class",
+        "static",
+        "new",
+        "true",
+        "false",
+        "null"
+
+    ];
+
+
+    // ==========================================================
+    // SIMBOLOS SIMPLES
+    // ==========================================================
+
+    const simbolosSimples = [
+
+        "+",
+        "-",
+        "*",
+        "/",
+        "=",
+        "<",
+        ">",
+        "(",
+        ")",
+        "{",
+        "}",
+        "[",
+        "]",
+        ";",
+        ",",
+        ".",
+        ":"
+
+    ];
+
+
+    // ==========================================================
+    // SIMBOLOS COMPUESTOS
+    // ==========================================================
+
+    const simbolosCompuestos = [
+
+        "==",
+        "!=",
+        "<=",
+        ">=",
+        "++",
+        "--",
+        "&&",
+        "||",
+        "+=",
+        "-=",
+        "*=",
+        "/="
+
+    ];
+
+
+    // ==========================================================
+    // ANALIZAR ENTRADA
+    // ==========================================================
+
+    function analizarEntrada() {
+
+        const entrada =
+            document.getElementById("entrada").value;
+
+        analizar(entrada);
+    }
+
+
+    // ==========================================================
+    // ANALIZADOR PRINCIPAL
+    // ==========================================================
+
+    function analizar(entrada) {
+
+        entrada = entrada.trim();
+
+        if (entrada.length === 0) {
+
+            mostrarError(
+                entrada,
+                "Entrada vacía.",
+                "Escriba una palabra o token."
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // CADENA
+        // ------------------------------------------------------
+
+        if (esCadena(entrada)) {
+
+            mostrarResultado(
+                entrada,
+                "CADENA",
+                "La cadena es válida."
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // CADENA MAL FORMADA
+        // ------------------------------------------------------
+
+        if (entrada.charAt(0) === '"') {
+
+            mostrarError(
+                entrada,
+                "La cadena no está cerrada correctamente.",
+                'Agregue una comilla doble al final. Ejemplo: "Hola"'
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // SIMBOLO COMPUESTO
+        // ------------------------------------------------------
+
+        if (esSimboloCompuesto(entrada)) {
+
+            mostrarResultado(
+                entrada,
+                "SIMBOLO COMPUESTO",
+                "El símbolo compuesto es válido."
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // SIMBOLO SIMPLE
+        // ------------------------------------------------------
+
+        if (esSimboloSimple(entrada)) {
+
+            mostrarResultado(
+                entrada,
+                "SIMBOLO SIMPLE",
+                "El símbolo simple es válido."
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // PALABRA RESERVADA
+        // ------------------------------------------------------
+
+        if (esPalabraReservada(entrada)) {
+
+            mostrarResultado(
+                entrada,
+                "PALABRA RESERVADA",
+                "La palabra reservada es válida."
+            );
+
+            return;
+        }
+
+
+        // ------------------------------------------------------
+        // MATRIZ
+        // ------------------------------------------------------
+
+        const resultado =
+            analizarConMatriz(entrada);
+
+
+        if (resultado.tipo !== "ERROR") {
+
+            mostrarResultado(
+                entrada,
+                resultado.tipo,
+                resultado.mensaje
+            );
+
+        } else {
+
+            mostrarError(
+                entrada,
+                resultado.causa,
+                resultado.solucion
+            );
+        }
+    }
+
+
+    // ==========================================================
+    // ANALISIS MEDIANTE MATRIZ
+    // ==========================================================
+
+    function analizarConMatriz(entrada) {
+
+        let estado = 0;
+
+        let recorrido = "q0";
+
+        let tienePunto = false;
+        let tieneExponente = false;
+
+
+        for (let i = 0; i < entrada.length; i++) {
+
+            const caracter = entrada.charAt(i);
+
+            const columna =
+                obtenerColumna(caracter);
+
+
+            // --------------------------------------------------
+            // SIGNO
+            // --------------------------------------------------
+
+            if (columna === 4) {
+
+                if (i !== 0) {
+
+                    const anterior =
+                        entrada.charAt(i - 1);
+
+                    if (anterior !== "E" &&
+                        anterior !== "e") {
+
+                        return {
+
+                            tipo: "ERROR",
+
+                            causa:
+                                "El signo + o - está en una posición incorrecta.",
+
+                            solucion:
+                                "Coloque el signo al inicio o después de E/e."
+
+                        };
+                    }
+                }
+            }
+
+
+            // --------------------------------------------------
+            // TRANSICION
+            // --------------------------------------------------
+
+            const nuevoEstado =
+                matriz[estado][columna];
+
+
+            if (nuevoEstado === 9) {
+
+                return {
+
+                    tipo: "ERROR",
+
+                    causa:
+                        "La combinación de caracteres no es válida.",
+
+                    solucion:
+                        "Revise la estructura del token."
+
+                };
+            }
+
+
+            // --------------------------------------------------
+            // PUNTO
+            // --------------------------------------------------
+
+            if (caracter === ".") {
+
+                if (tienePunto) {
+
+                    return {
+
+                        tipo: "ERROR",
+
+                        causa:
+                            "El número contiene más de un punto decimal.",
+
+                        solucion:
+                            "Utilice solamente un punto decimal. Ejemplo: 12.50."
+
+                    };
+                }
+
+                tienePunto = true;
+            }
+
+
+            // --------------------------------------------------
+            // EXPONENTE
+            // --------------------------------------------------
+
+            if (caracter === "E" ||
+                caracter === "e") {
+
+                if (tieneExponente) {
+
+                    return {
+
+                        tipo: "ERROR",
+
+                        causa:
+                            "El número contiene más de un exponente.",
+
+                        solucion:
+                            "Utilice solamente una E o e."
+
+                    };
+                }
+
+                tieneExponente = true;
+            }
+
+
+            estado = nuevoEstado;
+
+            recorrido += " → q" + estado;
+        }
+
+
+        document.getElementById("recorrido").style.display =
+            "block";
+
+        document.getElementById("recorrido").innerHTML =
+            "<strong>Recorrido del autómata:</strong><br>" +
+            recorrido;
+
+
+        // ------------------------------------------------------
+        // ESTADOS FINALES
+        // ------------------------------------------------------
+
+        if (estado === 1 || estado === 2) {
+
+            if (variableValida(entrada)) {
+
+                return {
+
+                    tipo: "VARIABLE",
+
+                    mensaje:
+                        "La variable cumple con las reglas establecidas."
+
+                };
+            }
+
+            return {
+
+                tipo: "ERROR",
+
+                causa:
+                    "Después de aparecer un número no se permiten más letras.",
+
+                solucion:
+                    "Utilice una variable como abc123."
+
+            };
+        }
+
+
+        if (estado === 3) {
+
+            return {
+
+                tipo: "NUMERO ENTERO",
+
+                mensaje:
+                    "El número entero es válido."
+
+            };
+        }
+
+
+        if (estado === 5) {
+
+            return {
+
+                tipo: "NUMERO REAL",
+
+                mensaje:
+                    "El número real es válido."
+
+            };
+        }
+
+
+        if (estado === 8) {
+
+            return {
+
+                tipo: "NUMERO CIENTIFICO",
+
+                mensaje:
+                    "El número científico es válido."
+
+            };
+        }
+
+
+        return {
+
+            tipo: "ERROR",
+
+            causa:
+                "La entrada terminó en un estado no válido.",
+
+            solucion:
+                "Revise la estructura de la entrada."
+
+        };
+    }
+
+
+    // ==========================================================
+    // OBTENER COLUMNA
+    // ==========================================================
+
+    function obtenerColumna(caracter) {
+
+        if (esLetra(caracter)) {
+
+            return 0;
+        }
+
+        if (esDigito(caracter)) {
+
+            return 1;
+        }
+
+        if (caracter === ".") {
+
+            return 2;
+        }
+
+        if (caracter === "E" ||
+            caracter === "e") {
+
+            return 3;
+        }
+
+        if (caracter === "+" ||
+            caracter === "-") {
+
+            return 4;
+        }
+
+        return 5;
+    }
+
+
+    // ==========================================================
+    // LETRA
+    // ==========================================================
+
+    function esLetra(caracter) {
+
+        const codigo =
+            caracter.charCodeAt(0);
+
+        return (
+
+            (codigo >= 65 && codigo <= 90) ||
+            (codigo >= 97 && codigo <= 122)
+
+        );
+    }
+
+
+    // ==========================================================
+    // DIGITO
+    // ==========================================================
+
+    function esDigito(caracter) {
+
+        const codigo =
+            caracter.charCodeAt(0);
+
+        return codigo >= 48 &&
+               codigo <= 57;
+    }
+
+
+    // ==========================================================
+    // VARIABLE
+    // ==========================================================
+
+    function variableValida(palabra) {
+
+        if (palabra.length === 0) {
+
+            return false;
+        }
+
+
+        if (!esLetra(palabra.charAt(0))) {
+
+            return false;
+        }
+
+
+        let aparecioNumero = false;
+
+
+        for (let i = 1; i < palabra.length; i++) {
+
+            const caracter =
+                palabra.charAt(i);
+
+
+            if (esDigito(caracter)) {
+
+                aparecioNumero = true;
+
+            } else if (esLetra(caracter)) {
+
+                if (aparecioNumero) {
+
+                    return false;
+                }
+
+            } else {
+
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+
+    // ==========================================================
+    // PALABRA RESERVADA
+    // ==========================================================
+
+    function esPalabraReservada(palabra) {
+
+        for (let i = 0;
+             i < palabrasReservadas.length;
+             i++) {
+
+            if (palabra === palabrasReservadas[i]) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    // ==========================================================
+    // SIMBOLO SIMPLE
+    // ==========================================================
+
+    function esSimboloSimple(palabra) {
+
+        if (palabra.length !== 1) {
+
+            return false;
+        }
+
+
+        for (let i = 0;
+             i < simbolosSimples.length;
+             i++) {
+
+            if (palabra === simbolosSimples[i]) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    // ==========================================================
+    // SIMBOLO COMPUESTO
+    // ==========================================================
+
+    function esSimboloCompuesto(palabra) {
+
+        for (let i = 0;
+             i < simbolosCompuestos.length;
+             i++) {
+
+            if (palabra === simbolosCompuestos[i]) {
+
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+
+    // ==========================================================
+    // CADENA
+    // ==========================================================
+
+    function esCadena(palabra) {
+
+        if (palabra.length < 2) {
+
+            return false;
+        }
+
+
+        if (palabra.charAt(0) !== '"' ||
+            palabra.charAt(palabra.length - 1) !== '"') {
+
+            return false;
+        }
+
+
+        for (let i = 1;
+             i < palabra.length - 1;
+             i++) {
+
+            if (palabra.charAt(i) === '"') {
+
+                return false;
+            }
+        }
+
+
+        return true;
+    }
+
+
+    // ==========================================================
+    // MOSTRAR RESULTADO
+    // ==========================================================
+
+    function mostrarResultado(
+        entrada,
+        tipo,
+        mensaje
+    ) {
+
+        const resultado =
+            document.getElementById("resultado");
+
+
+        resultado.style.display = "block";
+
+        resultado.className =
+            "resultado valido";
+
+
+        document.getElementById(
+            "estadoResultado"
+        ).textContent =
+            "✓ ENTRADA VÁLIDA";
+
+
+        document.getElementById(
+            "textoEntrada"
+        ).textContent =
+            entrada;
+
+
+        document.getElementById(
+            "tipoResultado"
+        ).textContent =
+            tipo;
+
+
+        document.getElementById(
+            "mensajeResultado"
+        ).textContent =
+            mensaje;
+    }
+
+
+    // ==========================================================
+    // MOSTRAR ERROR
+    // ==========================================================
+
+    function mostrarError(
+        entrada,
+        causa,
+        solucion
+    ) {
+
+        const resultado =
+            document.getElementById("resultado");
+
+
+        resultado.style.display = "block";
+
+        resultado.className =
+            "resultado error";
+
+
+        document.getElementById(
+            "estadoResultado"
+        ).textContent =
+            "✗ ERROR LÉXICO";
+
+
+        document.getElementById(
+            "textoEntrada"
+        ).textContent =
+            entrada === ""
+                ? "(vacía)"
+                : entrada;
+
+
+        document.getElementById(
+            "tipoResultado"
+        ).textContent =
+            "ERROR";
+
+
+        document.getElementById(
+            "mensajeResultado"
+        ).innerHTML =
+            "<strong>Causa:</strong> " +
+            causa +
+            "<br><br>" +
+            "<strong>Solución:</strong> " +
+            solucion;
+
+
+        document.getElementById(
+            "recorrido"
+        ).style.display =
+            "none";
+    }
+
+
+    // ==========================================================
+    // PRUEBA RAPIDA
+    // ==========================================================
+
+    function probar(valor) {
+
+        document.getElementById(
+            "entrada"
+        ).value = valor;
+
+        analizar(valor);
+    }
+
+
+    // ==========================================================
+    // ENTER PARA ANALIZAR
+    // ==========================================================
+
+    document.getElementById(
+        "entrada"
+    ).addEventListener(
+        "keydown",
+        function(event) {
+
+            if (event.key === "Enter") {
+
+                analizarEntrada();
+            }
+        }
+    );
+
+</script>
+
+</body>
+</html>
+```
